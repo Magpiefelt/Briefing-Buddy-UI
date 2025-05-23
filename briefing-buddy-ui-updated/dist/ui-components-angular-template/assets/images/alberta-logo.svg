@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script type="module" src="https://cdn.jsdelivr.net/npm/ionicons@latest/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://cdn.jsdelivr.net/npm/ionicons@latest/dist/ionicons/ionicons.js"></script>
+
+    <link rel="shortcut icon" type="image/ico" href="/favicon-192.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png" />
+
+    <title>Design system</title>
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-4WSDG1TGT8"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag("js", new Date());
+
+      gtag("config", "G-4WSDG1TGT8");
+    </script>
+    <script type="module" crossorigin src="/assets/index-BIbwxkRQ.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-Cm7jQxh4.css">
+  </head>
+
+  <body>
+    <div id="root"></div>
+  </body>
+</html>
