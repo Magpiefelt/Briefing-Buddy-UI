@@ -1,0 +1,75 @@
+<goa-one-column-layout>
+  <section slot="header">
+    <goa-microsite-header
+      type="alpha"
+      version="Angular 1.0"
+      feedbackUrl="https://github.com/GovAlta/ui-components/issues/new/choose">
+    </goa-microsite-header>
+    <goa-app-header url="/" heading="BriefingBuddy" maxContentWidth="100%">
+    </goa-app-header>
+  </section>
+  <goa-page-block width="904px">
+    <div class="get-started-container">
+      <h1>Briefing Buddy</h1>
+      
+      <div class="overview-section">
+        <p class="overview-text">
+          A short overview of the service. This is a couple sentences that helps
+          the user understand what the service is.
+        </p>
+        
+        <div class="service-uses">
+          <p>Use this service to apply for briefing assistance. You can use this service to:</p>
+          <ul>
+            <li>See if you or a family member is eligible for briefing assistance</li>
+            <li>Create and submit an application for briefing assistance</li>
+            <li>Continue an application for briefing assistance that you already started</li>
+          </ul>
+        </div>
+      </div>
+      
+      <div class="before-begin-section">
+        <h2>Before you begin</h2>
+        <p>The application form should take about 20 minutes to complete.</p>
+        
+        <div class="requirements">
+          <p>In order to complete the application you will need:</p>
+          <ul>
+            <li>government issued ID for the person applying</li>
+          </ul>
+        </div>
+      </div>
+      
+      <button class="get-started-button" (click)="navigateToChat()">
+        Get started
+        <span class="arrow-icon">→</span>
+      </button>
+      
+      <div class="additional-info-section">
+        <h2>Other information about the service</h2>
+        <p>
+          This section contains supplementary details about the service, including
+          descriptions of less common scenarios, exceptions, and additional resources
+          available. It provides context and additional insights that may be relevant to your
+          specific circumstances or interests, helping you understand the full scope and
+          utility of the service offered.
+        </p>
+      </div>
+      
+      <div class="support-section">
+        <h2>Support</h2>
+        <p>For assistance, email us at <a href="mailto:help@gov.ab.ca">help@gov.ab.ca</a></p>
+      </div>
+    </div>
+  </goa-page-block>
+  <section slot="footer">
+    <goa-app-footer maxContentWidth="100%">
+      <goa-app-footer-meta-section slot="meta">
+        <a href="#">About</a>
+        <a href="#">Help centre</a>
+        <a href="#">Disclaimer</a>
+        <a href="#">Privacy</a>
+      </goa-app-footer-meta-section>
+    </goa-app-footer>
+  </section>
+</goa-one-column-layout>

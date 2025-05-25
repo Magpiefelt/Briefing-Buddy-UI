@@ -1,0 +1,141 @@
+<goa-one-column-layout>
+  <section slot="header">
+    <goa-microsite-header
+      type="alpha"
+      version="Angular 1.0"
+      feedbackUrl="https://github.com/GovAlta/ui-components/issues/new/choose">
+    </goa-microsite-header>
+    <goa-app-header url="/" heading="BriefingBuddy" maxContentWidth="100%">
+      <div slot="actions" class="user-profile">
+        <span>{{ currentUser?.name || 'Jane Doe' }}</span>
+        <button class="logout-button" (click)="logout()">
+          <span class="material-icons">logout</span>
+        </button>
+      </div>
+    </goa-app-header>
+  </section>
+  
+  <div class="chat-layout">
+    <!-- Sidebar navigation -->
+    <div class="sidebar">
+      <div class="workspace-title">My workspace</div>
+      <nav class="nav-menu">
+        <a class="nav-item">
+          <span class="material-icons">dashboard</span>
+          Dashboard
+        </a>
+        <a class="nav-item">
+          <span class="material-icons">folder</span>
+          Projects
+        </a>
+        <a class="nav-item">
+          <span class="material-icons">assignment_turned_in</span>
+          Pending approvals
+        </a>
+        <a class="nav-item">
+          <span class="material-icons">assignment</span>
+          Requests
+        </a>
+        <a class="nav-item">
+          <span class="material-icons">bookmark</span>
+          Bookmarks
+        </a>
+        <a class="nav-item active">
+          <span class="material-icons">chat</span>
+          Chat
+        </a>
+      </nav>
+    </div>
+    
+    <!-- Main chat area -->
+    <div class="chat-area">
+      <div class="chat-header">
+        <div class="chat-title">Chat</div>
+        <div class="chat-actions">
+          <button class="action-button" (click)="exportChat()">
+            <span class="material-icons">file_download</span>
+            Export
+          </button>
+          <button class="action-button" (click)="shareChat()">
+            <span class="material-icons">share</span>
+            Share
+          </button>
+        </div>
+      </div>
+      
+      <div class="chat-container" #chatContainer>
+        <div class="messages">
+          <!-- Display messages -->
+          <div *ngFor="let message of messages" 
+               [ngClass]="{'message': true, 'user-message': message.from === 'user', 'assistant-message': message.from === 'assistant'}">
+            <div class="message-content">
+              <div *ngIf="message.from === 'assistant'" class="message-header">
+                <div class="message-source">Sources: BriefingBuddy AI Agent</div>
+                <div class="message-time">{{ message.timestamp | date:'shortTime' }}</div>
+              </div>
+              <div class="message-text">{{ message.text }}</div>
+            </div>
+            <div *ngIf="message.from === 'assistant'" class="message-actions">
+              <button class="icon-button">
+                <span class="material-icons">volume_up</span>
+              </button>
+              <button class="icon-button">
+                <span class="material-icons">content_copy</span>
+              </button>
+              <button class="icon-button">
+                <span class="material-icons">bookmark_border</span>
+              </button>
+              <button class="icon-button thumbs-up">
+                <span class="material-icons">thumb_up</span>
+              </button>
+              <button class="icon-button thumbs-down">
+                <span class="material-icons">thumb_down</span>
+              </button>
+            </div>
+          </div>
+          
+          <!-- Typing indicator -->
+          <div *ngIf="isTyping" class="typing-indicator">
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Message input area -->
+      <div class="message-input-container">
+        <div *ngIf="errorMessage" class="error-message">{{ errorMessage }}</div>
+        <form [formGroup]="messageForm" (ngSubmit)="sendMessage()" class="message-form">
+          <input 
+            type="text" 
+            formControlName="message" 
+            placeholder="Type your message here..." 
+            class="message-input"
+            [disabled]="isTyping">
+          <button 
+            type="submit" 
+            class="send-button" 
+            [disabled]="messageForm.invalid || isTyping">
+            <span class="material-icons">send</span>
+            Send
+          </button>
+        </form>
+        <div class="disclaimer">
+          BriefingBuddy is powered by AI. While it strives for accuracy, some errors might occur.
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <section slot="footer">
+    <goa-app-footer maxContentWidth="100%">
+      <goa-app-footer-meta-section slot="meta">
+        <a href="#">About</a>
+        <a href="#">Help centre</a>
+        <a href="#">Disclaimer</a>
+        <a href="#">Privacy</a>
+      </goa-app-footer-meta-section>
+    </goa-app-footer>
+  </section>
+</goa-one-column-layout>
