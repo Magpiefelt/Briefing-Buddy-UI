@@ -109,8 +109,4 @@ This application uses the Alberta Government Design System for consistent brandi
 4. Push to the branch: `git push origin feature/your-feature-name`
 5. Submit a pull request
 
-## License
-This project is licensed under the terms specified by the Government of Alberta.
 
-## Support
-For assistance, email help@gov.ab.ca
