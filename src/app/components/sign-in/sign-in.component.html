@@ -1,0 +1,76 @@
+<goa-one-column-layout>
+  <section slot="header">
+    <goa-microsite-header
+      type="alpha"
+      feedbackUrl="https://github.com/GovAlta/ui-components/issues/new/choose">
+    </goa-microsite-header>
+    <goa-app-header url="/" heading="BriefingBuddy" maxContentWidth="100%">
+    </goa-app-header>
+  </section>
+  <goa-page-block width="904px">
+    <div class="sign-in-container">
+      <h1>Sign in</h1>
+      
+      <div *ngIf="errorMessage" class="alert alert-danger" role="alert" aria-live="assertive">
+        {{ errorMessage }}
+      </div>
+      
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" novalidate>
+        <div class="form-group">
+          <label for="email">GoA email address</label>
+          <input 
+            type="email" 
+            id="email" 
+            formControlName="email" 
+            class="form-control" 
+            [ngClass]="{'is-invalid': submitted && f['email'].errors}"
+            aria-required="true"
+            aria-describedby="email-error">
+          <div id="email-error" *ngIf="submitted && f['email'].errors" class="error-message" aria-live="polite">
+            <div *ngIf="f['email'].errors['required']">Email is required</div>
+            <div *ngIf="f['email'].errors['email'] || f['email'].errors['pattern']">Please enter a valid email address</div>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input 
+            type="password" 
+            id="password" 
+            formControlName="password" 
+            class="form-control" 
+            [ngClass]="{'is-invalid': submitted && f['password'].errors}"
+            aria-required="true"
+            aria-describedby="password-error">
+          <div id="password-error" *ngIf="submitted && f['password'].errors" class="error-message" aria-live="polite">
+            <div *ngIf="f['password'].errors['required']">Password is required</div>
+            <div *ngIf="f['password'].errors['minlength']">Password must be at least 6 characters</div>
+          </div>
+        </div>
+        
+        <div class="forgot-password">
+          <a href="#" tabindex="0">Forgot password?</a>
+        </div>
+        
+        <button 
+          type="submit" 
+          class="sign-in-button" 
+          [disabled]="loading"
+          aria-label="Sign in">
+          <span *ngIf="loading" class="spinner-border spinner-border-sm mr-1" role="status" aria-hidden="true"></span>
+          Sign in
+        </button>
+      </form>
+    </div>
+  </goa-page-block>
+  <section slot="footer">
+    <goa-app-footer maxContentWidth="100%">
+      <goa-app-footer-meta-section slot="meta">
+        <a href="#" tabindex="0">About</a>
+        <a href="#" tabindex="0">Help centre</a>
+        <a href="#" tabindex="0">Disclaimer</a>
+        <a href="#" tabindex="0">Privacy</a>
+      </goa-app-footer-meta-section>
+    </goa-app-footer>
+  </section>
+</goa-one-column-layout>
