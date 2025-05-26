@@ -1,3 +1,8 @@
 [build]
-  command = "npm install --legacy-peer-deps && npm run build"
+  command = "npm install --legacy-peer-deps --force && npm run build"
   publish = "dist/ui-components-angular-template/browser"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
