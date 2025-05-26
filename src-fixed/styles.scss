@@ -1,0 +1,152 @@
+@import '../node_modules/@abgov/design-tokens/dist/tokens.scss';
+@import '../node_modules/material-icons/iconfont/material-icons.scss';
+
+/* Global styles */
+body {
+  font-family: var(--goa-font-family-sans);
+  color: var(--goa-color-text-default);
+  line-height: 1.5;
+  margin: 0;
+  padding: 0;
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--goa-font-family-sans);
+  margin-top: 0;
+}
+
+h1 {
+  font-size: var(--goa-font-size-8);
+  font-weight: var(--goa-font-weight-bold);
+  line-height: var(--goa-line-height-heading);
+}
+
+h2 {
+  font-size: var(--goa-font-size-7);
+  font-weight: var(--goa-font-weight-bold);
+  line-height: var(--goa-line-height-heading);
+}
+
+h3 {
+  font-size: var(--goa-font-size-6);
+  font-weight: var(--goa-font-weight-bold);
+  line-height: var(--goa-line-height-heading);
+}
+
+p {
+  font-size: var(--goa-font-size-4);
+  line-height: var(--goa-line-height-body);
+  margin-top: 0;
+}
+
+a {
+  color: var(--goa-color-interactive-default);
+  text-decoration: none;
+  
+  &:hover {
+    text-decoration: underline;
+    color: var(--goa-color-interactive-hover);
+  }
+  
+  &:focus {
+    outline: 2px solid var(--goa-color-interactive-focus);
+    outline-offset: 2px;
+  }
+}
+
+/* Buttons */
+button {
+  font-family: var(--goa-font-family-sans);
+  font-size: var(--goa-font-size-4);
+  
+  &:focus {
+    outline: 2px solid var(--goa-color-interactive-focus);
+    outline-offset: 2px;
+  }
+}
+
+/* Form elements */
+input, textarea, select {
+  font-family: var(--goa-font-family-sans);
+  font-size: var(--goa-font-size-4);
+  
+  &:focus {
+    outline: 2px solid var(--goa-color-interactive-focus);
+    outline-offset: 0;
+  }
+}
+
+/* Accessibility */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Material Icons */
+.material-icons {
+  font-family: 'Material Icons';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Spacing utilities */
+.mt-1 { margin-top: var(--goa-spacing-xs); }
+.mt-2 { margin-top: var(--goa-spacing-s); }
+.mt-3 { margin-top: var(--goa-spacing-m); }
+.mt-4 { margin-top: var(--goa-spacing-l); }
+.mt-5 { margin-top: var(--goa-spacing-xl); }
+
+.mb-1 { margin-bottom: var(--goa-spacing-xs); }
+.mb-2 { margin-bottom: var(--goa-spacing-s); }
+.mb-3 { margin-bottom: var(--goa-spacing-m); }
+.mb-4 { margin-bottom: var(--goa-spacing-l); }
+.mb-5 { margin-bottom: var(--goa-spacing-xl); }
+
+.ml-1 { margin-left: var(--goa-spacing-xs); }
+.ml-2 { margin-left: var(--goa-spacing-s); }
+.ml-3 { margin-left: var(--goa-spacing-m); }
+.ml-4 { margin-left: var(--goa-spacing-l); }
+.ml-5 { margin-left: var(--goa-spacing-xl); }
+
+.mr-1 { margin-right: var(--goa-spacing-xs); }
+.mr-2 { margin-right: var(--goa-spacing-s); }
+.mr-3 { margin-right: var(--goa-spacing-m); }
+.mr-4 { margin-right: var(--goa-spacing-l); }
+.mr-5 { margin-right: var(--goa-spacing-xl); }
+
+.p-1 { padding: var(--goa-spacing-xs); }
+.p-2 { padding: var(--goa-spacing-s); }
+.p-3 { padding: var(--goa-spacing-m); }
+.p-4 { padding: var(--goa-spacing-l); }
+.p-5 { padding: var(--goa-spacing-xl); }
+
+/* Responsive utilities */
+@media (max-width: 768px) {
+  .hide-mobile {
+    display: none !important;
+  }
+}
+
+@media (min-width: 769px) {
+  .hide-desktop {
+    display: none !important;
+  }
+}
