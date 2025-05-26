@@ -1,0 +1,105 @@
+:host {
+  background-color: var(--goa-color-greyscale-100);
+  display: block;
+  min-height: 100vh;
+}
+
+.sign-in-container {
+  max-width: 500px;
+  margin: 0 auto;
+  padding: var(--goa-spacing-l);
+  background-color: var(--goa-color-white);
+  border-radius: var(--goa-border-radius-m);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+  font-size: var(--goa-font-size-8);
+  margin-bottom: var(--goa-spacing-m);
+  color: var(--goa-color-text-default);
+}
+
+.form-group {
+  margin-bottom: var(--goa-spacing-m);
+}
+
+label {
+  display: block;
+  margin-bottom: var(--goa-spacing-xs);
+  font-weight: var(--goa-font-weight-bold);
+  color: var(--goa-color-text-default);
+}
+
+.form-control {
+  width: 100%;
+  padding: var(--goa-spacing-s);
+  border: 1px solid var(--goa-color-greyscale-200);
+  border-radius: var(--goa-border-radius-s);
+  font-size: var(--goa-font-size-4);
+  min-height: 48px;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: var(--goa-color-interactive-focus);
+  box-shadow: var(--goa-shadow-focus);
+}
+
+.is-invalid {
+  border-color: var(--goa-color-emergency-default) !important;
+}
+
+.error-message {
+  color: var(--goa-color-emergency-default);
+  font-size: var(--goa-font-size-3);
+  margin-top: var(--goa-spacing-2xs);
+}
+
+.forgot-password {
+  text-align: right;
+  margin-bottom: var(--goa-spacing-m);
+}
+
+.forgot-password a {
+  color: var(--goa-color-interactive-default);
+  text-decoration: none;
+}
+
+.forgot-password a:hover {
+  text-decoration: underline;
+}
+
+.alert {
+  padding: var(--goa-spacing-s) var(--goa-spacing-m);
+  margin-bottom: var(--goa-spacing-m);
+  border-radius: var(--goa-border-radius-s);
+}
+
+.alert-danger {
+  background-color: var(--goa-color-emergency-light);
+  color: var(--goa-color-emergency-dark);
+  border: 1px solid var(--goa-color-emergency-default);
+}
+
+.sign-in-button {
+  display: block;
+  width: 100%;
+  padding: var(--goa-spacing-s) var(--goa-spacing-m);
+  background-color: var(--goa-color-interactive-default);
+  color: var(--goa-color-white);
+  border: none;
+  border-radius: var(--goa-border-radius-s);
+  font-size: var(--goa-font-size-4);
+  font-weight: var(--goa-font-weight-bold);
+  cursor: pointer;
+  margin-top: var(--goa-spacing-m);
+}
+
+.sign-in-button:hover {
+  background-color: var(--goa-color-interactive-hover);
+}
+
+.sign-in-button:disabled {
+  background-color: var(--goa-color-greyscale-200);
+  cursor: not-allowed;
+}
