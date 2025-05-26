@@ -1,0 +1,24 @@
+<goa-one-column-layout>
+  <section slot="header">
+    <goa-microsite-header
+      type="alpha"
+      feedbackUrl="https://github.com/GovAlta/ui-components/issues/new/choose">
+    </goa-microsite-header>
+    <goa-app-header url="/" heading="BriefingBuddy">
+      <div slot="right">
+        <goa-button type="tertiary" size="medium" href="/sign-in">Sign in</goa-button>
+      </div>
+    </goa-app-header>
+  </section>
+  <router-outlet></router-outlet>
+  <section slot="footer">
+    <goa-app-footer>
+      <goa-app-footer-meta-section slot="meta">
+        <a href="#" tabindex="0">About</a>
+        <a href="#" tabindex="0">Help centre</a>
+        <a href="#" tabindex="0">Disclaimer</a>
+        <a href="#" tabindex="0">Privacy</a>
+      </goa-app-footer-meta-section>
+    </goa-app-footer>
+  </section>
+</goa-one-column-layout>
