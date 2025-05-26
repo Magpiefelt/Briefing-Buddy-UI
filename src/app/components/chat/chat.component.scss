@@ -1,0 +1,397 @@
+.chat-layout {
+  display: flex;
+  height: calc(100vh - 200px);
+  background-color: var(--goa-color-greyscale-100);
+}
+
+.sidebar {
+  width: 260px;
+  border-right: 1px solid var(--goa-color-greyscale-200);
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  background-color: #f9f9f9;
+}
+
+/* Focus states for accessibility */
+button:focus, 
+a:focus, 
+input:focus, 
+select:focus, 
+textarea:focus {
+  outline: 2px solid var(--goa-color-interactive-focus);
+  outline-offset: 2px;
+}
+
+/* Sidebar navigation */
+.workspace-title {
+  font-size: 1.25rem;
+  font-weight: var(--goa-font-weight-bold);
+  margin-bottom: 1.75rem;
+  color: var(--goa-color-text-default);
+  padding-left: 0.5rem;
+}
+
+.nav-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  color: var(--goa-color-text-default);
+  text-decoration: none;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+}
+
+.nav-item:hover {
+  background-color: var(--goa-color-greyscale-200);
+}
+
+.nav-item.active {
+  background-color: rgba(0, 129, 162, 0.1); /* Updated to match Alberta blue */
+  color: #0081A2; /* Updated to match Alberta blue */
+  border-left: 4px solid #0081A2; /* Updated to match Alberta blue */
+  padding-left: calc(1rem - 4px);
+}
+
+.nav-item .material-icons {
+  margin-right: 0.75rem;
+  font-size: 1.25rem;
+}
+
+/* Chat area styles */
+.chat-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background-color: white;
+  margin-left: 1px;
+}
+
+.chat-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--goa-color-greyscale-200);
+}
+
+.chat-title {
+  font-size: 1.5rem;
+  font-weight: var(--goa-font-weight-bold);
+  color: var(--goa-color-text-default);
+}
+
+.chat-actions {
+  display: flex;
+  gap: 1rem;
+}
+
+.action-button {
+  display: flex;
+  align-items: center;
+  padding: 0.625rem 1rem;
+  background-color: var(--goa-color-greyscale-200);
+  border: none;
+  border-radius: 4px;
+  color: #0081A2; /* Updated to match Alberta blue */
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.export-button, .share-button {
+  padding: 0.75rem 1.25rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.action-button:hover {
+  background-color: var(--goa-color-greyscale-100);
+}
+
+.action-button .material-icons {
+  font-size: 1.25rem;
+  margin-right: 0.5rem;
+}
+
+/* Chat container styles */
+.chat-container {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.5rem;
+}
+
+.messages {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.message {
+  max-width: 80%;
+}
+
+.user-message {
+  align-self: flex-end;
+  background-color: #0081A2; /* Updated to match Alberta blue */
+  color: white;
+  border-radius: 12px; /* Increased border radius */
+  padding: 1.25rem; /* Increased padding */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15); /* Enhanced shadow */
+  max-width: 90%; /* Increased width */
+}
+
+.assistant-message {
+  align-self: flex-start;
+  background-color: #E6F2F8; /* Light blue background to match reference */
+  color: var(--goa-color-text-default);
+  border-radius: 12px; /* Increased border radius */
+  padding: 1.25rem; /* Increased padding */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Enhanced shadow */
+  border: 1px solid #D1E8F5; /* Matching border color */
+  max-width: 90%; /* Increased width */
+}
+
+.message-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--goa-color-text-secondary);
+  font-weight: var(--goa-font-weight-bold);
+}
+
+.message-content {
+  margin-bottom: 0.5rem;
+}
+
+.message-text {
+  line-height: 1.5;
+}
+
+.message-actions {
+  display: flex;
+  justify-content: flex-start;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  padding-left: 0.5rem;
+}
+
+.icon-button {
+  background: none;
+  border: none;
+  color: var(--goa-color-text-secondary);
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 50%;
+  transition: background-color 0.2s ease;
+}
+
+.icon-button:hover {
+  background-color: var(--goa-color-greyscale-200);
+}
+
+.thumbs-up.active, .thumbs-down.active {
+  color: #0081A2; /* Updated to match Alberta blue */
+}
+
+/* Typing indicator */
+.typing-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 1rem;
+  background-color: #E6F2F8; /* Light blue background to match Alberta colors */
+  border-radius: 8px;
+  width: fit-content;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  background-color: #0081A2; /* Updated to match Alberta blue */
+  border-radius: 50%;
+  animation: bounce 1.5s infinite ease-in-out;
+}
+
+.dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes bounce {
+  0%, 60%, 100% {
+    transform: translateY(0);
+  }
+  30% {
+    transform: translateY(-5px);
+  }
+}
+
+/* Message input area */
+.message-input-container {
+  padding: 1.25rem 1.5rem;
+  border-top: 1px solid var(--goa-color-greyscale-200);
+  background-color: white;
+}
+
+.message-form {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.message-input {
+  flex: 1;
+  padding: 0.875rem 1.125rem;
+  border: 1px solid var(--goa-color-greyscale-200);
+  border-radius: 8px;
+  font-size: 1rem;
+  min-height: 52px;
+  width: 100%;
+  max-width: 704px; /* Match reference design width */
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.message-input:focus {
+  outline: none;
+  border-color: #0081A2; /* Updated to match Alberta blue */
+  box-shadow: 0 0 0 3px rgba(0, 129, 162, 0.25); /* Updated to match Alberta blue */
+}
+
+.send-button {
+  display: flex;
+  align-items: center;
+  padding: 0.875rem 1.25rem;
+  background-color: #0081A2; /* Updated to match Alberta blue */
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.send-button:hover {
+  background-color: #006d8a; /* Darker Alberta blue for hover */
+}
+
+.send-button:disabled {
+  background-color: var(--goa-color-greyscale-200);
+  cursor: not-allowed;
+}
+
+.send-button .material-icons {
+  margin-right: 0.5rem;
+}
+
+.disclaimer {
+  font-size: 0.875rem;
+  color: var(--goa-color-text-secondary);
+  text-align: center;
+  margin-top: 0.5rem;
+}
+
+.error-message {
+  color: var(--goa-color-emergency-default);
+  margin-bottom: 0.75rem;
+  font-weight: var(--goa-font-weight-bold);
+  padding: 0.5rem;
+  border-radius: 4px;
+  background-color: var(--goa-color-emergency-light);
+}
+
+/* User profile in header */
+.user-profile {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.logout-button {
+  background: none;
+  border: none;
+  color: var(--goa-color-text-default);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: color 0.2s ease;
+}
+
+.logout-button:hover {
+  color: #0081A2; /* Updated to match Alberta blue */
+}
+
+/* Screen reader only class */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .chat-layout {
+    flex-direction: column;
+    height: auto;
+  }
+  
+  .sidebar {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid var(--goa-color-greyscale-200);
+    padding: 1.25rem;
+    background-color: #f9f9f9;
+  }
+  
+  .chat-area {
+    width: 100%;
+    margin-left: 0;
+  }
+  
+  .chat-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .chat-actions {
+    margin-top: 1rem;
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .chat-container {
+    height: 50vh;
+  }
+  
+  .message {
+    max-width: 90%;
+  }
+  
+  .message-input-container {
+    padding: 0.75rem 1rem;
+  }
+  
+  .message-form {
+    flex-direction: column;
+  }
+  
+  .send-button {
+    align-self: flex-end;
+  }
+}
