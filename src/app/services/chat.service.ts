@@ -103,54 +103,87 @@ export class ChatService {
     this.addMessage(userMessage);
     
     // Prepare request to webhook
-    const webhookUrl = environment.webhookUrl;
+    // Use the proxy URL if we're in a browser environment
+    let webhookUrl = environment.webhookUrl;
+    if (typeof window !== 'undefined') {
+      // Extract the webhook ID from the full URL
+      const webhookId = webhookUrl.split('/').pop();
+      // Use the Netlify proxy path instead of the direct URL
+      webhookUrl = `/api/${webhookId}`;
+    }
+    
     const headers = new HttpHeaders({
       'Content-Type': 'application/json'
     });
     
     // Add structured prompt instruction for consistent output
     const promptWithInstruction = {
-  message: text,
-  instruction: "Please provide a detailed response based on GoA project information. Format your answer as a JSON object with an 'answer' field containing your complete response. Include specific project details when available."
-};
+      message: text,
+      instruction: "Please provide a detailed response based on GoA project information. Format your answer as a JSON object with an 'answer' field containing your complete response. Include specific project details when available."
+    };
     
-    // Send to webhook and process response
-    return this.http.post<any>(webhookUrl, promptWithInstruction, { headers }).pipe(
+    // Send to webhook and process response - using responseType: 'text' to handle non-JSON responses
+    return this.http.post<string>(webhookUrl, promptWithInstruction, { 
+      headers: headers,
+      responseType: 'text' as const 
+    }).pipe(
       timeout(this.timeoutDuration),
       retry(this.retryCount),
       map(response => {
-        console.log('Webhook response:', response);
+        console.log('Webhook response (raw):', response);
         
-        // Parse response text from any of the possible fields
-        // Check for nested response structures that might contain the answer
-        const responseText = 
-          // Direct fields
-          response.answer || 
-          response.message || 
-          response.text || 
-          response.content ||
-          response.output ||
-          // Common nested structures
-          (response.data && (
-            response.data.answer || 
-            response.data.message || 
-            response.data.text || 
-            response.data.content ||
-            response.data.output
-          )) ||
-          // Handle array responses (some webhooks return arrays)
-          (Array.isArray(response) && response.length > 0 && (
-            response[0].answer || 
-            response[0].message || 
-            response[0].text || 
-            response[0].content ||
-            response[0].output
-          )) ||
-          // Handle stringified JSON responses
-          (typeof response === 'string' ? response : null);
+        let responseText = '';
+        
+        // If response is a string, try to parse it as JSON first
+        if (typeof response === 'string') {
+          try {
+            // Try to parse as JSON
+            const parsedResponse = JSON.parse(response);
+            console.log('Parsed JSON response:', parsedResponse);
+            
+            // Check for nested response structures that might contain the answer
+            responseText = 
+              // Direct fields
+              parsedResponse.answer || 
+              parsedResponse.message || 
+              parsedResponse.text || 
+              parsedResponse.content ||
+              parsedResponse.output ||
+              // Common nested structures
+              (parsedResponse.data && (
+                parsedResponse.data.answer || 
+                parsedResponse.data.message || 
+                parsedResponse.data.text || 
+                parsedResponse.data.content ||
+                parsedResponse.data.output
+              )) ||
+              // Handle array responses (some webhooks return arrays)
+              (Array.isArray(parsedResponse) && parsedResponse.length > 0 && (
+                parsedResponse[0].answer || 
+                parsedResponse[0].message || 
+                parsedResponse[0].text || 
+                parsedResponse[0].content ||
+                parsedResponse[0].output
+              ));
+              
+            if (!responseText) {
+              // If we couldn't find expected fields in the parsed JSON, use the raw string
+              console.log('Could not find expected fields in parsed JSON, using raw response');
+              responseText = response;
+            }
+          } catch (e) {
+            // If parsing fails, use the raw string response
+            console.log('Response is not valid JSON, using as plain text:', e);
+            responseText = response;
+          }
+        } else {
+          // This shouldn't happen with responseType: 'text', but handle it just in case
+          console.warn('Unexpected response type:', typeof response);
+          responseText = String(response);
+        }
         
         if (!responseText) {
-          console.warn('Webhook response missing expected fields:', response);
+          console.warn('Webhook response missing expected content:', response);
           return this.createFallbackMessage('I received a response but couldn\'t parse it properly. Please try rephrasing your question.');
         }
         
@@ -183,8 +216,8 @@ export class ChatService {
           }
           
           if (error.status === 0) {
-            // Network error
-            errorMessage = this.createFallbackMessage('Network error. Please check your internet connection and try again.');
+            // Network error or CORS issue
+            errorMessage = this.createFallbackMessage('Network error or CORS issue. Please check your internet connection and ensure the webhook allows cross-origin requests from this domain.');
           } else if (error.status === 408) {
             // HTTP timeout error
             errorMessage = this.createFallbackMessage('The request timed out. The server might be experiencing high load. Please try again later.');
