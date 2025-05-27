@@ -1,0 +1,8 @@
+{
+  "scripts": {
+    "cypress:open": "cypress open",
+    "cypress:run": "cypress run",
+    "e2e": "cypress run",
+    "test:coverage": "ng test --code-coverage"
+  }
+}

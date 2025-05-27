@@ -1,0 +1,32 @@
+// Update azure-pipelines.yml to include Cypress E2E tests
+stages:
+- stage: E2ETests
+  displayName: 'Run E2E Tests'
+  dependsOn: Build
+  jobs:
+  - job: CypressTests
+    displayName: 'Run Cypress E2E tests'
+    pool:
+      vmImage: $(vmImageName)
+    steps:
+    - task: NodeTool@0
+      inputs:
+        versionSpec: '20.x'
+      displayName: 'Install Node.js'
+
+    - script: |
+        npm ci
+      displayName: 'Install dependencies'
+
+    - script: |
+        npm run e2e
+      displayName: 'Run Cypress E2E tests'
+
+    - task: PublishTestResults@2
+      inputs:
+        testResultsFormat: 'JUnit'
+        testResultsFiles: 'cypress/results/*.xml'
+        mergeTestResults: true
+        testRunTitle: 'E2E Tests'
+      displayName: 'Publish E2E test results'
+      condition: succeededOrFailed()

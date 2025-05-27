@@ -1,0 +1,116 @@
+# Default values for briefing-buddy-ui.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 2
+
+image:
+  repository: ${CONTAINER_REGISTRY}/briefing-buddy-ui
+  pullPolicy: Always
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: "latest"
+
+imagePullSecrets:
+  - name: registry-credentials
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+  hosts:
+    - host: briefing-buddy-ui.apps.aro.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: briefing-buddy-ui-tls
+      hosts:
+        - briefing-buddy-ui.apps.aro.example.com
+
+resources:
+  limits:
+    cpu: 300m
+    memory: 256Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+# Environment-specific configuration
+env:
+  NODE_ENV: production
+
+# ConfigMap for non-sensitive configuration
+configMap:
+  enabled: true
+  data:
+    NODE_ENV: production
+    API_URL: "https://api.example.com"
+    FEATURE_FLAGS: "feature1=true,feature2=false"
+
+# Secrets for sensitive configuration
+secrets:
+  enabled: true
+  # These values will be base64 encoded automatically
+  data:
+    WEBHOOK_URL: "https://govab.app.n8n.cloud/webhook/10e3909d-3a60-41b5-9b2f-a6c3bc149d9d"
+    SENTRY_DSN: "https://examplePublicKey@o0.ingest.sentry.io/0"
+
+# Health check configuration
+livenessProbe:
+  enabled: true
+  path: /healthz
+  initialDelaySeconds: 30
+  timeoutSeconds: 5
+  periodSeconds: 10
+  failureThreshold: 3
+
+readinessProbe:
+  enabled: true
+  path: /healthz
+  initialDelaySeconds: 10
+  timeoutSeconds: 5
+  periodSeconds: 10
+  failureThreshold: 3

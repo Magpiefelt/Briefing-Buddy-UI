@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "briefing-buddy-ui.fullname" . }}
+  labels:
+    {{- include "briefing-buddy-ui.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "briefing-buddy-ui.selectorLabels" . | nindent 4 }}
