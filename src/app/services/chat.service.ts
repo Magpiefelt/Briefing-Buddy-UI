@@ -12,6 +12,21 @@ export interface ChatMessage {
   error?: boolean;
 }
 
+interface WebhookResponse {
+  answer?: string;
+  message?: string;
+  text?: string;
+  content?: string;
+  output?: string;
+  data?: {
+    answer?: string;
+    message?: string;
+    text?: string;
+    content?: string;
+    output?: string;
+  };
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -102,7 +117,6 @@ export class ChatService {
     // Add to messages
     this.addMessage(userMessage);
     
-    // Prepare request to webhook
     // Use the direct webhook URL instead of trying to proxy through Netlify
     const webhookUrl = environment.webhookUrl;
     
@@ -133,40 +147,28 @@ export class ChatService {
         if (response) {
           if (typeof response === 'string') {
             responseText = response;
-          } else if (typeof response === 'object') {
+          } else {
+            // Safely cast to our interface type
+            const typedResponse = response as WebhookResponse;
+            
             // Check for nested response structures that might contain the answer
             responseText = 
               // Direct fields
-              response.answer || 
-              response.message || 
-              response.text || 
-              response.content ||
-              response.output ||
+              typedResponse.answer || 
+              typedResponse.message || 
+              typedResponse.text || 
+              typedResponse.content ||
+              typedResponse.output ||
               // Common nested structures
-              (response.data && (
-                response.data.answer || 
-                response.data.message || 
-                response.data.text || 
-                response.data.content ||
-                response.data.output
+              (typedResponse.data && (
+                typedResponse.data.answer || 
+                typedResponse.data.message || 
+                typedResponse.data.text || 
+                typedResponse.data.content ||
+                typedResponse.data.output
               )) ||
-              // Handle array responses (some webhooks return arrays)
-              (Array.isArray(response) && response.length > 0 && (
-                response[0].answer || 
-                response[0].message || 
-                response[0].text || 
-                response[0].content ||
-                response[0].output
-              ));
-              
-            if (!responseText) {
               // If we couldn't find expected fields, stringify the whole response
-              console.log('Could not find expected fields in response, using full response');
-              responseText = JSON.stringify(response);
-            }
-          } else {
-            console.warn('Unexpected response type:', typeof response);
-            responseText = String(response);
+              JSON.stringify(response);
           }
         }
         
