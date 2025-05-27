@@ -5,4 +5,5 @@
   force = true
 
 [build]
-  command = "npm install && NODE_OPTIONS=--max_old_space_size=4096 npm run build -- --configuration=production --target=es2018"
+  command = "npm install && NODE_OPTIONS=--max_old_space_size=4096 npm run build -- --configuration=production"
+  publish = "dist/briefing-buddy-ui"
