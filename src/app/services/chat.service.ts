@@ -18,6 +18,7 @@ interface WebhookResponse {
   text?: string;
   content?: string;
   output?: string;
+  error?: string;
   data?: {
     answer?: string;
     message?: string;
@@ -35,6 +36,7 @@ export class ChatService {
   private retryCount = 2; // Number of retries for failed requests
   private timeoutDuration = 30000; // 30 seconds timeout
   private isOffline = false;
+  private maxMessageLength = 250; // Character limit for messages to prevent database errors
   
   constructor(private http: HttpClient) {
     // Load any saved messages from localStorage
@@ -107,6 +109,11 @@ export class ChatService {
       return this.handleOfflineMode(text);
     }
     
+    // Check message length to prevent database errors
+    if (text.length > this.maxMessageLength) {
+      return this.handleMessageTooLong(text);
+    }
+    
     // Create user message
     const userMessage: ChatMessage = {
       from: 'user',
@@ -150,6 +157,15 @@ export class ChatService {
           } else {
             // Safely cast to our interface type
             const typedResponse = response as WebhookResponse;
+            
+            // Check for error response
+            if (typedResponse.error) {
+              console.error('Error from webhook:', typedResponse.error);
+              if (typedResponse.error.includes('value too long')) {
+                return this.createFallbackMessage('Your message is too long for our system to process. Please try a shorter message (under 250 characters).');
+              }
+              return this.createFallbackMessage(`Error from server: ${typedResponse.error}`);
+            }
             
             // Check for nested response structures that might contain the answer
             responseText = 
@@ -203,6 +219,16 @@ export class ChatService {
           } else {
             // Server-side error
             console.error(`Server error: ${error.status}, body:`, error.error);
+            
+            // Check for specific error messages in the response
+            if (typeof error.error === 'object' && error.error !== null) {
+              const errorObj = error.error as any;
+              if (errorObj.error && typeof errorObj.error === 'string') {
+                if (errorObj.error.includes('value too long')) {
+                  return of(this.createFallbackMessage('Your message is too long for our system to process. Please try a shorter message (under 250 characters).'));
+                }
+              }
+            }
           }
           
           if (error.status === 0) {
@@ -234,6 +260,32 @@ export class ChatService {
         return of(errorMessage);
       })
     );
+  }
+  
+  /**
+   * Handle messages that exceed the character limit
+   */
+  private handleMessageTooLong(text: string): Observable<ChatMessage> {
+    // Create user message with truncated text for display
+    const userMessage: ChatMessage = {
+      from: 'user',
+      text: text.substring(0, this.maxMessageLength) + '...',
+      timestamp: new Date()
+    };
+    
+    // Add to messages
+    this.addMessage(userMessage);
+    
+    // Create error message
+    const errorMessage = this.createFallbackMessage(
+      'Your message is too long for our system to process. Please try a shorter message (under 250 characters).'
+    );
+    
+    // Add to messages
+    this.addMessage(errorMessage);
+    
+    // Return as observable
+    return of(errorMessage);
   }
   
   /**
