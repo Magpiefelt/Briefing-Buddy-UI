@@ -16,7 +16,7 @@
     "experimentalDecorators": true,
     "moduleResolution": "node",
     "importHelpers": true,
-    "target": "ES2018",
+    "target": "ES2015",
     "useDefineForClassFields": true,
     "module": "es2020",
     "lib": [
