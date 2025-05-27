@@ -122,64 +122,53 @@ export class ChatService {
       instruction: "Please provide a detailed response based on GoA project information. Format your answer as a JSON object with an 'answer' field containing your complete response. Include specific project details when available."
     };
     
-    // Send to webhook and process response - using responseType: 'text' to handle non-JSON responses
-    return this.http.post<string>(webhookUrl, promptWithInstruction, { 
-      headers: headers,
-      responseType: 'text' as const 
+    // Send to webhook and process response - using default responseType: 'json'
+    return this.http.post(webhookUrl, promptWithInstruction, { 
+      headers: headers
     }).pipe(
       timeout(this.timeoutDuration),
       retry(this.retryCount),
       map(response => {
-        console.log('Webhook response (raw):', response);
+        console.log('Webhook response:', response);
         
         let responseText = '';
         
-        // If response is a string, try to parse it as JSON first
-        if (typeof response === 'string') {
+        // Check for nested response structures that might contain the answer
+        if (response) {
+          responseText = 
+            // Direct fields
+            (response as any).answer || 
+            (response as any).message || 
+            (response as any).text || 
+            (response as any).content ||
+            (response as any).output ||
+            // Common nested structures
+            ((response as any).data && (
+              (response as any).data.answer || 
+              (response as any).data.message || 
+              (response as any).data.text || 
+              (response as any).data.content ||
+              (response as any).data.output
+            )) ||
+            // Handle array responses (some webhooks return arrays)
+            (Array.isArray(response) && response.length > 0 && (
+              (response[0] as any).answer || 
+              (response[0] as any).message || 
+              (response[0] as any).text || 
+              (response[0] as any).content ||
+              (response[0] as any).output
+            ));
+        }
+        
+        if (!responseText) {
+          // If we couldn't find expected fields, try to use the raw response
+          console.warn('Could not find expected fields in response, using raw response');
           try {
-            // Try to parse as JSON
-            const parsedResponse = JSON.parse(response);
-            console.log('Parsed JSON response:', parsedResponse);
-            
-            // Check for nested response structures that might contain the answer
-            responseText = 
-              // Direct fields
-              parsedResponse.answer || 
-              parsedResponse.message || 
-              parsedResponse.text || 
-              parsedResponse.content ||
-              parsedResponse.output ||
-              // Common nested structures
-              (parsedResponse.data && (
-                parsedResponse.data.answer || 
-                parsedResponse.data.message || 
-                parsedResponse.data.text || 
-                parsedResponse.data.content ||
-                parsedResponse.data.output
-              )) ||
-              // Handle array responses (some webhooks return arrays)
-              (Array.isArray(parsedResponse) && parsedResponse.length > 0 && (
-                parsedResponse[0].answer || 
-                parsedResponse[0].message || 
-                parsedResponse[0].text || 
-                parsedResponse[0].content ||
-                parsedResponse[0].output
-              ));
-              
-            if (!responseText) {
-              // If we couldn't find expected fields in the parsed JSON, use the raw string
-              console.log('Could not find expected fields in parsed JSON, using raw response');
-              responseText = response;
-            }
+            responseText = JSON.stringify(response);
           } catch (e) {
-            // If parsing fails, use the raw string response
-            console.log('Response is not valid JSON, using as plain text:', e);
-            responseText = response;
+            console.error('Error stringifying response:', e);
+            responseText = String(response);
           }
-        } else {
-          // This shouldn't happen with responseType: 'text', but handle it just in case
-          console.warn('Unexpected response type:', typeof response);
-          responseText = String(response);
         }
         
         if (!responseText) {
