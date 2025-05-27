@@ -36,7 +36,6 @@ export class ChatService {
   private retryCount = 2; // Number of retries for failed requests
   private timeoutDuration = 30000; // 30 seconds timeout
   private isOffline = false;
-  private maxMessageLength = 250; // Character limit for messages to prevent database errors
   
   constructor(private http: HttpClient) {
     // Load any saved messages from localStorage
@@ -109,11 +108,6 @@ export class ChatService {
       return this.handleOfflineMode(text);
     }
     
-    // Check message length to prevent database errors
-    if (text.length > this.maxMessageLength) {
-      return this.handleMessageTooLong(text);
-    }
-    
     // Create user message
     const userMessage: ChatMessage = {
       from: 'user',
@@ -134,7 +128,7 @@ export class ChatService {
     // Add structured prompt instruction for consistent output
     const promptWithInstruction = {
       message: text,
-      instruction: "Please provide a detailed response based on GoA project information. Format your answer as a JSON object with an 'answer' field containing your complete response. Include specific project details when available."
+      instruction: "Please provide a concise response based on GoA project information. Keep your answer under 250 characters to avoid database constraints. Format your answer as a JSON object with an 'answer' field."
     };
     
     console.log('Sending request to webhook:', webhookUrl);
@@ -148,12 +142,27 @@ export class ChatService {
       map(response => {
         console.log('Webhook response:', response);
         
+        // First check if the response is an error object with the specific database length error
+        if (this.isLengthErrorResponse(response)) {
+          return this.handleLengthError();
+        }
+        
         let responseText = '';
         
         // Check for various response formats
         if (response) {
           if (typeof response === 'string') {
-            responseText = response;
+            // Check if the string response is a JSON error about length
+            try {
+              const parsedResponse = JSON.parse(response);
+              if (this.isLengthErrorResponse(parsedResponse)) {
+                return this.handleLengthError();
+              }
+              responseText = this.extractResponseText(parsedResponse);
+            } catch (e) {
+              // If parsing fails, use the raw string response
+              responseText = response;
+            }
           } else {
             // Safely cast to our interface type
             const typedResponse = response as WebhookResponse;
@@ -161,30 +170,13 @@ export class ChatService {
             // Check for error response
             if (typedResponse.error) {
               console.error('Error from webhook:', typedResponse.error);
-              if (typedResponse.error.includes('value too long')) {
-                return this.createFallbackMessage('Your message is too long for our system to process. Please try a shorter message (under 250 characters).');
+              if (this.isLengthError(typedResponse.error)) {
+                return this.handleLengthError();
               }
               return this.createFallbackMessage(`Error from server: ${typedResponse.error}`);
             }
             
-            // Check for nested response structures that might contain the answer
-            responseText = 
-              // Direct fields
-              typedResponse.answer || 
-              typedResponse.message || 
-              typedResponse.text || 
-              typedResponse.content ||
-              typedResponse.output ||
-              // Common nested structures
-              (typedResponse.data && (
-                typedResponse.data.answer || 
-                typedResponse.data.message || 
-                typedResponse.data.text || 
-                typedResponse.data.content ||
-                typedResponse.data.output
-              )) ||
-              // If we couldn't find expected fields, stringify the whole response
-              JSON.stringify(response);
+            responseText = this.extractResponseText(typedResponse);
           }
         }
         
@@ -221,13 +213,8 @@ export class ChatService {
             console.error(`Server error: ${error.status}, body:`, error.error);
             
             // Check for specific error messages in the response
-            if (typeof error.error === 'object' && error.error !== null) {
-              const errorObj = error.error as any;
-              if (errorObj.error && typeof errorObj.error === 'string') {
-                if (errorObj.error.includes('value too long')) {
-                  return of(this.createFallbackMessage('Your message is too long for our system to process. Please try a shorter message (under 250 characters).'));
-                }
-              }
+            if (this.isLengthErrorResponse(error.error)) {
+              return of(this.handleLengthError());
             }
           }
           
@@ -263,29 +250,83 @@ export class ChatService {
   }
   
   /**
-   * Handle messages that exceed the character limit
+   * Check if the response is a length error response
    */
-  private handleMessageTooLong(text: string): Observable<ChatMessage> {
-    // Create user message with truncated text for display
-    const userMessage: ChatMessage = {
-      from: 'user',
-      text: text.substring(0, this.maxMessageLength) + '...',
-      timestamp: new Date()
-    };
+  private isLengthErrorResponse(response: any): boolean {
+    if (!response) return false;
     
-    // Add to messages
-    this.addMessage(userMessage);
+    // Check direct error object
+    if (typeof response === 'object' && response.error && this.isLengthError(response.error)) {
+      return true;
+    }
     
-    // Create error message
-    const errorMessage = this.createFallbackMessage(
-      'Your message is too long for our system to process. Please try a shorter message (under 250 characters).'
+    // Check string representation
+    if (typeof response === 'string') {
+      return response.includes('value too long for type character varying');
+    }
+    
+    // Check stringified object
+    const stringified = JSON.stringify(response);
+    return stringified.includes('value too long for type character varying');
+  }
+  
+  /**
+   * Check if the error message is about length
+   */
+  private isLengthError(error: string): boolean {
+    return error.includes('value too long for type character') || 
+           error.includes('varying(255)');
+  }
+  
+  /**
+   * Handle the specific length error from the backend
+   */
+  private handleLengthError(): ChatMessage {
+    const message = this.createFallbackMessage(
+      'The AI generated a response that was too long for our system to process. ' +
+      'I\'ll try to provide a shorter answer: The information you requested is available, ' +
+      'but requires a more detailed explanation than our system can currently handle. ' +
+      'Please try asking a more specific question for a more focused response.'
     );
     
-    // Add to messages
-    this.addMessage(errorMessage);
+    this.addMessage(message);
+    return message;
+  }
+  
+  /**
+   * Extract response text from various response formats
+   */
+  private extractResponseText(response: any): string {
+    if (!response) return '';
     
-    // Return as observable
-    return of(errorMessage);
+    // Direct fields
+    if (response.answer) return response.answer;
+    if (response.message) return response.message;
+    if (response.text) return response.text;
+    if (response.content) return response.content;
+    if (response.output) return response.output;
+    
+    // Common nested structures
+    if (response.data) {
+      if (response.data.answer) return response.data.answer;
+      if (response.data.message) return response.data.message;
+      if (response.data.text) return response.data.text;
+      if (response.data.content) return response.data.content;
+      if (response.data.output) return response.data.output;
+    }
+    
+    // Handle array responses (some webhooks return arrays)
+    if (Array.isArray(response) && response.length > 0) {
+      const firstItem = response[0];
+      if (firstItem.answer) return firstItem.answer;
+      if (firstItem.message) return firstItem.message;
+      if (firstItem.text) return firstItem.text;
+      if (firstItem.content) return firstItem.content;
+      if (firstItem.output) return firstItem.output;
+    }
+    
+    // If we couldn't find expected fields, stringify the whole response
+    return JSON.stringify(response);
   }
   
   /**
