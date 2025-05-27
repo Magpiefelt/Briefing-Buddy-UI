@@ -12,12 +12,12 @@ import { AuthService } from '../../services/auth.service';
 export class ChatComponent implements OnInit, AfterViewChecked {
   @ViewChild('chatContainer') chatContainer!: ElementRef; // Added definite assignment assertion
   
-  messageForm: FormGroup;
+  messageForm!: FormGroup; // Added definite assignment assertion
   messages: ChatMessage[] = [];
   isTyping = false;
   errorMessage = '';
   currentUser: any;
-  maxMessageLength = 500; // Maximum character count for messages
+  maxMessageLength = 250; // Reduced to match backend constraint
   remainingChars = this.maxMessageLength;
   showToast = false;
   toastMessage = '';
@@ -39,6 +39,12 @@ export class ChatComponent implements OnInit, AfterViewChecked {
     private elementRef: ElementRef,
     private renderer: Renderer2
   ) {
+    // Initialize form in constructor to ensure it's available before template renders
+    this.initializeForm();
+  }
+  
+  // Separate method for form initialization to improve clarity
+  private initializeForm(): void {
     this.messageForm = this.formBuilder.group({
       message: ['', [Validators.required, Validators.maxLength(this.maxMessageLength)]]
     });
@@ -60,10 +66,13 @@ export class ChatComponent implements OnInit, AfterViewChecked {
     // Scroll to bottom of chat
     setTimeout(() => this.scrollToBottom(), 100);
     
-    // Set up character counter
-    this.messageForm.get('message')?.valueChanges.subscribe(value => {
-      this.remainingChars = this.maxMessageLength - (value ? value.length : 0);
-    });
+    // Set up character counter with null check
+    const messageControl = this.messageForm.get('message');
+    if (messageControl) {
+      messageControl.valueChanges.subscribe(value => {
+        this.remainingChars = this.maxMessageLength - (value ? value.length : 0);
+      });
+    }
     
     // Add event listener for escape key to close sidebar on mobile
     this.renderer.listen('window', 'keydown', (event: KeyboardEvent) => {
@@ -98,7 +107,10 @@ export class ChatComponent implements OnInit, AfterViewChecked {
   
   // Quick select a predefined user message
   selectUserMessage(message: string): void {
-    this.messageForm.get('message')?.setValue(message);
+    const messageControl = this.messageForm.get('message');
+    if (messageControl) {
+      messageControl.setValue(message);
+    }
   }
   
   // Check if message is from the same sender as previous message
@@ -142,10 +154,29 @@ export class ChatComponent implements OnInit, AfterViewChecked {
       return;
     }
     
-    const messageText = this.messageForm.get('message')?.value;
+    const messageControl = this.messageForm.get('message');
+    if (!messageControl) {
+      console.error('Message form control is not available');
+      return;
+    }
+    
+    const messageText = messageControl.value;
+    if (!messageText || messageText.trim() === '') {
+      return;
+    }
+    
+    // Check message length to prevent backend errors
+    if (messageText.length > this.maxMessageLength) {
+      this.errorMessage = `Message exceeds maximum length of ${this.maxMessageLength} characters.`;
+      setTimeout(() => {
+        this.errorMessage = '';
+        this.cdr.markForCheck();
+      }, 5000);
+      return;
+    }
     
     // Clear the input
-    this.messageForm.get('message')?.setValue('');
+    messageControl.setValue('');
     
     // Show typing indicator
     this.isTyping = true;
