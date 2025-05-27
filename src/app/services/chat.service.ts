@@ -110,9 +110,9 @@ export class ChatService {
     
     // Add structured prompt instruction for consistent output
     const promptWithInstruction = {
-      message: text,
-      instruction: "Please return a JSON object with an 'answer' field containing your response."
-    };
+  message: text,
+  instruction: "Please provide a detailed response based on GoA project information. Format your answer as a JSON object with an 'answer' field containing your complete response. Include specific project details when available."
+};
     
     // Send to webhook and process response
     return this.http.post<any>(webhookUrl, promptWithInstruction, { headers }).pipe(
