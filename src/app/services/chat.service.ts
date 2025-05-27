@@ -103,26 +103,12 @@ export class ChatService {
     this.addMessage(userMessage);
     
     // Prepare request to webhook
-    // Use the proxy URL if we're in a browser environment
-    let webhookUrl = environment.webhookUrl;
-    console.log('Original webhook URL:', webhookUrl);
-    
-    if (typeof window !== 'undefined') {
-      // Extract the webhook ID from the full URL
-      const webhookId = webhookUrl.split('/').pop();
-      console.log('Extracted webhook ID:', webhookId);
-      
-      // Use the Netlify proxy path instead of the direct URL
-      // Modified to use /api/webhook/ to match Netlify redirect pattern
-      webhookUrl = `/api/webhook/${webhookId}`;
-      console.log('Using proxied webhook URL:', webhookUrl);
-    }
+    // Use the direct webhook URL instead of trying to proxy through Netlify
+    const webhookUrl = environment.webhookUrl;
     
     const headers = new HttpHeaders({
       'Content-Type': 'application/json'
     });
-    
-    console.log('Request headers:', headers);
     
     // Add structured prompt instruction for consistent output
     const promptWithInstruction = {
@@ -130,76 +116,62 @@ export class ChatService {
       instruction: "Please provide a detailed response based on GoA project information. Format your answer as a JSON object with an 'answer' field containing your complete response. Include specific project details when available."
     };
     
-    console.log('Sending prompt to webhook:', promptWithInstruction);
+    console.log('Sending request to webhook:', webhookUrl);
     
-    // Try direct webhook call first with detailed logging
+    // Send to webhook and process response
     return this.http.post(webhookUrl, promptWithInstruction, { 
-      headers: headers,
-      observe: 'response'  // Get full response including headers
+      headers: headers
     }).pipe(
       timeout(this.timeoutDuration),
       retry(this.retryCount),
       map(response => {
-        console.log('Webhook response status:', response.status);
-        console.log('Webhook response headers:', response.headers);
-        console.log('Webhook response body:', response.body);
+        console.log('Webhook response:', response);
         
         let responseText = '';
-        const responseBody = response.body;
         
-        // Check for nested response structures that might contain the answer
-        if (responseBody) {
-          try {
+        // Check for various response formats
+        if (response) {
+          if (typeof response === 'string') {
+            responseText = response;
+          } else if (typeof response === 'object') {
+            // Check for nested response structures that might contain the answer
             responseText = 
               // Direct fields
-              (responseBody as any).answer || 
-              (responseBody as any).message || 
-              (responseBody as any).text || 
-              (responseBody as any).content ||
-              (responseBody as any).output ||
+              response.answer || 
+              response.message || 
+              response.text || 
+              response.content ||
+              response.output ||
               // Common nested structures
-              ((responseBody as any).data && (
-                (responseBody as any).data.answer || 
-                (responseBody as any).data.message || 
-                (responseBody as any).data.text || 
-                (responseBody as any).data.content ||
-                (responseBody as any).data.output
+              (response.data && (
+                response.data.answer || 
+                response.data.message || 
+                response.data.text || 
+                response.data.content ||
+                response.data.output
               )) ||
               // Handle array responses (some webhooks return arrays)
-              (Array.isArray(responseBody) && responseBody.length > 0 && (
-                (responseBody[0] as any).answer || 
-                (responseBody[0] as any).message || 
-                (responseBody[0] as any).text || 
-                (responseBody[0] as any).content ||
-                (responseBody[0] as any).output
+              (Array.isArray(response) && response.length > 0 && (
+                response[0].answer || 
+                response[0].message || 
+                response[0].text || 
+                response[0].content ||
+                response[0].output
               ));
               
-            console.log('Extracted response text:', responseText);
-          } catch (e) {
-            console.error('Error extracting response fields:', e);
-          }
-        }
-        
-        if (!responseText) {
-          // If we couldn't find expected fields, try to use the raw response
-          console.warn('Could not find expected fields in response, using raw response');
-          try {
-            if (typeof responseBody === 'string') {
-              // If it's already a string, use it directly
-              responseText = responseBody;
-            } else {
-              // Otherwise stringify it
-              responseText = JSON.stringify(responseBody);
+            if (!responseText) {
+              // If we couldn't find expected fields, stringify the whole response
+              console.log('Could not find expected fields in response, using full response');
+              responseText = JSON.stringify(response);
             }
-            console.log('Using stringified response:', responseText);
-          } catch (e) {
-            console.error('Error stringifying response:', e);
-            responseText = String(responseBody);
+          } else {
+            console.warn('Unexpected response type:', typeof response);
+            responseText = String(response);
           }
         }
         
         if (!responseText) {
-          console.warn('Webhook response missing expected content:', responseBody);
+          console.warn('Webhook response missing expected content:', response);
           return this.createFallbackMessage('I received a response but couldn\'t parse it properly. Please try rephrasing your question.');
         }
         
@@ -223,16 +195,9 @@ export class ChatService {
         
         if (error instanceof HttpErrorResponse) {
           // Log detailed error information for HttpErrorResponse
-          console.error('HTTP Error Status:', error.status);
-          console.error('HTTP Error Status Text:', error.statusText);
-          console.error('HTTP Error URL:', error.url);
-          console.error('HTTP Error Type:', error.type);
-          console.error('HTTP Error Headers:', error.headers);
-          
           if (error.error instanceof ErrorEvent) {
             // Client-side error
             console.error('Client error:', error.error.message);
-            console.error('Client error stack:', error.error.error?.stack);
           } else {
             // Server-side error
             console.error(`Server error: ${error.status}, body:`, error.error);
@@ -249,18 +214,14 @@ export class ChatService {
             errorMessage = this.createFallbackMessage('The server encountered an error. Our team has been notified and is working on it. Please try again later.');
           } else {
             // Other HTTP errors
-            errorMessage = this.createFallbackMessage(`Sorry, I encountered an error processing your request (HTTP ${error.status}). Please try again later.`);
+            errorMessage = this.createFallbackMessage('Sorry, I encountered an error processing your request. Please try again later.');
           }
         } else {
           // Handle generic Error objects (including timeout from rxjs)
-          console.error('Generic error name:', error.name);
-          console.error('Generic error message:', error.message);
-          console.error('Generic error stack:', error.stack);
-          
           if (error.name === 'TimeoutError') {
             errorMessage = this.createFallbackMessage('The request timed out. The server might be experiencing high load. Please try again later.');
           } else {
-            errorMessage = this.createFallbackMessage(`Sorry, I encountered an error processing your request (${error.name}). Please try again later.`);
+            errorMessage = this.createFallbackMessage('Sorry, I encountered an error processing your request. Please try again later.');
           }
         }
         
@@ -388,4 +349,3 @@ export class ChatService {
     }
   }
 }
-
